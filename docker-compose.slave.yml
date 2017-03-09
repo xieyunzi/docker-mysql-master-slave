@@ -1,0 +1,22 @@
+version: '3'
+services:
+  mysql-slave:
+    image: mariadb:10.3.0
+    ports:
+      - ${SLAVE_PORT_3306}
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      # - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - ./data/data:/var/lib/mysql
+      - ./data/log:/var/log/mysql
+      - ./configs/xz-slave.cnf.cnf:/etc/mysql/conf.d/xz-slave.cnf
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+networks:
+  default:
+    external:
+      name: xz-bridge

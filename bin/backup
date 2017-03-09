@@ -1,0 +1,28 @@
+#!/bin/bash
+# https://dba.stackexchange.com/questions/35081/any-option-for-mysqldump-to-ignore-databases-for-backup
+
+set -e
+
+[[ -n $MS_HOST ]]     || { echo 'missing env MS_HOST'; exit 1; }
+[[ -n $MS_PORT ]]     || MS_PORT=3306
+[[ -n $MS_USERNAME ]] || MS_USERNAME=root
+[[ -n $MS_PASSWORD ]] || MS_PASSWORD=root
+
+# EXEC='docker-compose run --rm mysql'
+EXEC='docker run --rm mariadb:10.1.21 '
+MYSQL_CONNECTION_OPTIONS="-h ${MS_HOST} -P ${MS_PORT} -u ${MS_USERNAME} -p${MS_PASSWORD}"
+
+databases=$(\
+${EXEC} sh -c "\
+  stty onlcr;\
+  mysql ${MYSQL_CONNECTION_OPTIONS} -e 'show databases'\
+  | grep -Ev '^(Database|mysql|performance_schema|information_schema)$'\
+  | tr '\n' ' '\
+  "\
+  )
+
+TIMENOW=$(date +%Y-%m%d-%H%M%S)
+${EXEC} sh -c \
+  "mysqldump ${MYSQL_CONNECTION_OPTIONS} --databases ${databases}"\
+  > ${TIMENOW}.sql
+

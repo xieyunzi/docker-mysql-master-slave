@@ -1,0 +1,2 @@
+45 1-23/2 * * * cd /data/docker/mysql-master; MS_HOST=172.17.0.1 ./bin/backup >/dev/null 2>&1
+
